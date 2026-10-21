@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+.pytest_cache/
+adapters/
+data/passage_embeddings.npy
+train_log.txt
+.DS_Store
+train_log*.txt
+run_rest.sh
