@@ -1,0 +1,107 @@
+{
+  "base": {
+    "overall": {
+      "n": 183,
+      "accuracy": 0.22950819672131148,
+      "hallucination_rate": 0.7213114754098361,
+      "abstention_rate": 0.04918032786885246
+    },
+    "yes_no": {
+      "n": 81,
+      "accuracy": 0.3950617283950617,
+      "hallucination_rate": 0.6049382716049383,
+      "abstention_rate": 0.0
+    },
+    "factoid": {
+      "n": 102,
+      "accuracy": 0.09803921568627451,
+      "hallucination_rate": 0.8137254901960784,
+      "abstention_rate": 0.08823529411764706
+    },
+    "seconds": 17.2
+  },
+  "lora_qa": {
+    "overall": {
+      "n": 183,
+      "accuracy": 0.40437158469945356,
+      "hallucination_rate": 0.5956284153005464,
+      "abstention_rate": 0.0
+    },
+    "yes_no": {
+      "n": 81,
+      "accuracy": 0.7654320987654321,
+      "hallucination_rate": 0.2345679012345679,
+      "abstention_rate": 0.0
+    },
+    "factoid": {
+      "n": 102,
+      "accuracy": 0.11764705882352941,
+      "hallucination_rate": 0.8823529411764706,
+      "abstention_rate": 0.0
+    },
+    "seconds": 17.8
+  },
+  "lora_qa_passages": {
+    "overall": {
+      "n": 183,
+      "accuracy": 0.43169398907103823,
+      "hallucination_rate": 0.5683060109289617,
+      "abstention_rate": 0.0
+    },
+    "yes_no": {
+      "n": 81,
+      "accuracy": 0.8024691358024691,
+      "hallucination_rate": 0.19753086419753085,
+      "abstention_rate": 0.0
+    },
+    "factoid": {
+      "n": 102,
+      "accuracy": 0.13725490196078433,
+      "hallucination_rate": 0.8627450980392157,
+      "abstention_rate": 0.0
+    },
+    "seconds": 15.1
+  },
+  "rag": {
+    "overall": {
+      "n": 183,
+      "accuracy": 0.639344262295082,
+      "hallucination_rate": 0.36065573770491804,
+      "abstention_rate": 0.0
+    },
+    "yes_no": {
+      "n": 81,
+      "accuracy": 0.7777777777777778,
+      "hallucination_rate": 0.2222222222222222,
+      "abstention_rate": 0.0
+    },
+    "factoid": {
+      "n": 102,
+      "accuracy": 0.5294117647058824,
+      "hallucination_rate": 0.47058823529411764,
+      "abstention_rate": 0.0
+    },
+    "seconds": 55.5
+  },
+  "lora_qa_passages+rag": {
+    "overall": {
+      "n": 183,
+      "accuracy": 0.6775956284153005,
+      "hallucination_rate": 0.3224043715846995,
+      "abstention_rate": 0.0
+    },
+    "yes_no": {
+      "n": 81,
+      "accuracy": 0.8395061728395061,
+      "hallucination_rate": 0.16049382716049382,
+      "abstention_rate": 0.0
+    },
+    "factoid": {
+      "n": 102,
+      "accuracy": 0.5490196078431373,
+      "hallucination_rate": 0.45098039215686275,
+      "abstention_rate": 0.0
+    },
+    "seconds": 61.1
+  }
+}

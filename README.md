@@ -47,8 +47,62 @@ They don't sum to 100%, because an honest "I don't know" is neither.
 
 ## Results
 
-> ⏳ Training is still running. This section will be filled in with the numbers
-> from `results/` when it finishes.
+183 held-out questions (81 yes/no, 102 factoid), greedy decoding.
+
+![Accuracy and hallucination rate per system](results/results_test.png)
+
+| System | Accuracy | Hallucination rate | Abstention rate | Yes/no acc. | Factoid acc. | Factoid halluc. |
+|---|---:|---:|---:|---:|---:|---:|
+| Base model (closed book) | 23.0% | 72.1% | 4.9% | 39.5% | 9.8% | 81.4% |
+| LoRA: Q&A only | 40.4% | 59.6% | 0.0% | 76.5% | 11.8% | 88.2% |
+| LoRA: Q&A + passages | 43.2% | 56.8% | 0.0% | 80.2% | 13.7% | 86.3% |
+| RAG (base + retrieval) | 63.9% | 36.1% | 0.0% | 77.8% | 52.9% | 47.1% |
+| **LoRA + RAG** | **67.8%** | **32.2%** | 0.0% | 84.0% | 54.9% | 45.1% |
+
+Answering "Yes" to every yes/no question would score 80.2% on that subset.
+With 183 questions, each number carries roughly ±7 points of sampling noise
+(95% interval), so gaps under ~7 points (such as the two LoRA systems, or RAG vs
+LoRA + RAG) are not reliable.
+
+Training: Q&A only took 8 min (243 steps), Q&A + passages took 92 min (1,374 steps), 3 epochs each on an M2 Pro.
+
+### What the numbers say
+
+1. **RAG wins on facts by a wide margin.** On factoid questions RAG is right
+   52.9% of the time, against 13.7% for the best closed-book LoRA. It also cuts
+   the hallucination rate from 56.8% to 36.1%.
+2. **Fine-tuning mostly learned the format, not the facts.** Most of the LoRA
+   gain over the base model comes from yes/no questions. The base model answers
+   "No" to 58% of them and is often wrong. The fine-tuned models learned the
+   answer format and the label prior instead: 82% of training yes/no answers
+   are "Yes", and the Q&A + passages adapter answered **"Yes" to all 81 test
+   yes/no questions**. Its 80.2% yes/no accuracy is exactly the always-"Yes"
+   baseline. On factoid questions, LoRA moved accuracy only from 9.8% to 13.7%.
+3. **Training on the passages barely helped.** Three epochs of next-token
+   training on the whole corpus added ~2–3 points over Q&A-only fine-tuning,
+   which is within noise. Reliably injecting new facts into a 0.5B model with
+   LoRA needs many more repetitions or paraphrased copies of each fact. RAG
+   just puts the fact in the prompt.
+4. **Fine-tuning made hallucination worse on factoid questions** (81.4% → 86–88%).
+   The base model sometimes says "I don't know" (4.9%). The fine-tuned models
+   never do, because none of their training answers were "I don't know". A model
+   copies the confidence of its training data.
+5. **The best system combines both.** The fine-tuned model reading retrieved
+   passages scored the best accuracy (67.8%) and the lowest hallucination rate
+   (32.2%). Fine-tuning supplies the answer format, and retrieval supplies the facts.
+6. **Retrieval sets the ceiling for RAG.** The exact gold answer appears in the
+   top-3 retrieved passages for 65% of factoid questions. RAG's 52.9% factoid
+   accuracy is close to that, so a better retriever (more passages, reranking,
+   hybrid BM25) would likely help more than a better generator.
+
+### Ideas to push it further
+
+- Add "I don't know" training examples (questions whose answers are not in
+  the corpus) to teach the fine-tuned model to abstain.
+- Rebalance yes/no training examples so the adapter can't win by always saying "Yes".
+- Generate several paraphrased Q&A pairs per passage (synthetic data) for
+  stronger knowledge injection, and try a 1.5B or 3B model on a machine with more memory.
+- Replace lexical grading with an LLM judge for factoid answers.
 
 ## Run it yourself
 
@@ -113,8 +167,12 @@ Two details in `train_lora.py` matter:
   also shows an always-"Yes" baseline and splits accuracy by question type.
 - Some questions only made sense next to their source article (e.g. *"What is
   the capital city?"*). Those are hard for every system.
-- The Q&A-only adapter's validation loss rises after epoch 1 (1.89 → 2.24 by epoch 3).
-  It overfits the 643 training answers, a reminder that more epochs aren't free.
+- Validation loss (`results/training_log_*.json`) shows overfitting. The Q&A-only
+  adapter is best after epoch 1 (1.89 → 2.24 by epoch 3), and Q&A + passages is
+  flat from epoch 1 to 2 and then rises (1.74 → 1.74 → 1.80). Saving the best
+  epoch, or training fewer epochs, would be the next tweak.
+- Spot-checking 24 graded factoid answers found the labels mostly right. The
+  misses are long, correct-in-spirit answers that fall under the F1 threshold.
 - On a memory-constrained Mac, MPS memory fragments when every batch has a different
   shape. The trainer pads batches to multiples of 64 tokens and empties the MPS
   cache every 10 steps to stop the process from growing until the machine swaps.
